@@ -3,6 +3,14 @@ name = "displaydoc-lite"
 version = "0.1.0"
 authors = ["Justus K <justus.k@protonmail.com>"]
 edition = "2018"
+description = "Implement the Display trait using your standard doc comments."
+documentation = "https://docs.rs/displaydoc-lite"
+homepage = "https://github.com/Stupremee/displaydoc-lite"
+repository = "https://github.com/Stupremee/displaydoc-lite"
+license = "MIT/Apache-2.0"
+readme = "README.md"
+keywords = ["derive", "display"]
+categories = []
 
 [dependencies]
 defile = "0.1"
