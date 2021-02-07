@@ -81,9 +81,9 @@ macro_rules! __parse_enum_variant__ {
         ),* $(,)?
     ) $(, $($tt:tt)* )? ) => {
         #[allow(unused)]
-        if let $name::$variant(..) = $this {
+        if let $crate::export::proc_macros::__tuple_bindings__!($name, $variant, $($field_ty,)*) = $this {
             $crate::export::defile::expr! {
-                $crate::__get_doc_string__!(@@unit $f, $(#[@$attr])*)
+                $crate::__get_doc_string__!(@@struct $f, $(#[@$attr])*)
             }
         } else {
             // process rest of the enum
@@ -188,7 +188,7 @@ mod tests {
             Foo,
             /// {s} is {x}
             Bar { s: u8, x: String },
-            /// tuple works too
+            /// {_0} tuple {_2} works too {_1}
             Baz(u8, u16, u32),
         }
     }
@@ -204,6 +204,6 @@ mod tests {
             .to_string(),
             "0 is hello"
         );
-        assert_eq!(Error::Baz(0, 1, 2).to_string(), "tuple works too");
+        assert_eq!(Error::Baz(0, 1, 2).to_string(), "0 tuple 2 works too 1");
     }
 }
