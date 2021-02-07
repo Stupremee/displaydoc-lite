@@ -54,30 +54,120 @@ pub use defile;
 #[macro_export]
 macro_rules! displaydoc {
     ($(#[$enum_attr:meta])*
-    $pub:vis enum $name:ident {$(
-        $(#[$attr:meta])*
-        $variant:ident
-    ),*$(,)?}) => {
+    $pub:vis enum $name:ident {
+        //$(#[$attr:meta])*
+        //$variant:ident
+        $($body:tt)*
+    }) => {
         $(#[$enum_attr])*
-        $pub enum $name {$(
-            $(#[$attr])*
-            $variant
-        ),*}
+        $pub enum $name { $($body)* }
 
-        impl ::core::fmt::Display for $name {
-            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                match self {
-                    $($name::$variant => $crate::defile::expr! {
-                        f.write_str($crate::displaydoc!(@@docs, $(#[@$attr])*))
-                    },)*
-                }
+        $crate::__parse_enum_variant__! { enum $name { $($body)* } }
+        //impl ::core::fmt::Display for $name {
+            //fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                //match self {
+                    //$($name::$variant => $crate::defile::expr! {
+                        //f.write_str($crate::displaydoc!(@@docs, $(#[@$attr])*))
+                    //},)*
+                //}
+            //}
+        //}
+    };
+}
+
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __parse_enum_variant__ {
+    // tuple variant
+    (@data $name:ident $this:ident $f:ident @variant $(#[$attr:meta])* $variant:ident (
+        $(
+            $( #[$field_meta:meta] )*
+            $field_vis:vis $field_ty:ty
+        ),* $(,)?
+    ) $(, $($tt:tt)* )? ) => {
+        #[allow(unused)]
+        if let $name::$variant(..) = $this {
+            $crate::defile::expr! {
+                $crate::__get_doc_string__!(@@unit $f, $(#[@$attr])*)
             }
+        } else {
+            // process rest of the enum
+            $crate::__token_or_ok__!( $( $crate::__parse_enum_variant__!(@data $name $this $f @variant $( $tt )*) )? )
         }
     };
 
-    (@docs, #[doc = $($doc:tt)*] $($rest:tt)*) => { ($($doc)*).trim() };
-    (@docs, #[$_:meta] $($rest:tt)*) => { $crate::displaydoc!(@docs, $($rest)*) };
-    (@docs,) => { "" };
+    // named variant
+    (@data $name:ident $this:ident $f:ident @variant $(#[$attr:meta])* $variant:ident {
+        $(
+            $( #[$field_meta:meta] )*
+            $field_vis:vis $field_name:ident : $field_ty:ty
+        ),* $(,)?
+    } $(, $($tt:tt)* )? ) => {
+        #[allow(unused)]
+        if let $name::$variant { .. } = $this {
+            $crate::defile::expr! {
+                $crate::__get_doc_string__!(@@unit $f, $(#[@$attr])*)
+            }
+        } else {
+            // process rest of the enum
+            $crate::__token_or_ok__!( $( $crate::__parse_enum_variant__!(@data $name $this $f @variant $( $tt )*) )? )
+        }
+    };
+
+    // unit variant
+    (@data $name:ident $this:ident $f:ident @variant
+        $( #[$field_meta:meta] )*
+        $variant:ident $(, $($tt:tt)* )?
+    ) => {
+        if let $name::$variant = $this {
+            $crate::defile::expr! {
+                $crate::__get_doc_string__!(@@unit $f, $(#[@$field_meta])*)
+            }
+        } else {
+            // process rest of the enum
+            $crate::__token_or_ok__!( $( $crate::__parse_enum_variant__!(@data $name $this $f @variant $( $tt )*) )? )
+        }
+    };
+
+    // trailing comma
+    (@data $_:ident $__:ident $___:ident @variant ,) => { unreachable!() };
+
+    // base case
+    (@data $_:ident $__:ident $___:ident @variant) => { unreachable!() };
+
+    // entry point
+    (
+        $( #[$meta:meta] )*
+        $vis:vis enum $name:ident {
+            $($tt:tt)*
+        }
+    ) => {
+        impl ::core::fmt::Display for $name {
+            fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+                $crate::__parse_enum_variant__!(@data $name self f @variant $($tt)*)
+            }
+        }
+    };
+}
+
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __token_or_ok__ {
+    ($x:expr) => {
+        $x
+    };
+
+    () => {
+        ::core::result::Result::Ok(())
+    };
+}
+
+#[macro_export]
+#[doc(hidden)]
+macro_rules! __get_doc_string__ {
+    (@unit $f:ident, #[doc = $($doc:tt)*] $($rest:tt)*) => { $f.write_str(($($doc)*).trim()) };
+    (@unit $f:ident, #[$_:meta] $($rest:tt)*) => { $crate::__get_doc_string__!($f, $($rest)*) };
+    (@unit $f:ident,) => { Ok(()) };
 }
 
 #[cfg(test)]
@@ -90,18 +180,22 @@ mod tests {
     displaydoc! {
         /// Hello
         #[derive(Debug)]
-        pub enum Error {
+        enum Error {
             /// Hello
             ///
             /// How are you
             Foo,
-            Bar,
+            /// test
+            Bar { s: u8 },
+            /// tuple works too
+            Baz(u8, u16, u32),
         }
     }
 
     #[test]
     fn it_works() {
         assert_eq!(Error::Foo.to_string(), "Hello");
-        assert_eq!(Error::Bar.to_string(), "");
+        assert_eq!(Error::Bar { s: 0 }.to_string(), "test");
+        assert_eq!(Error::Baz(0, 1, 2).to_string(), "tuple works too");
     }
 }
