@@ -44,6 +44,9 @@
 #![forbid(unsafe_code)]
 #![deny(rust_2018_idioms, missing_docs, clippy::pedantic)]
 
+#[doc(hidden)]
+pub use defile;
+
 /// The main macro of this crate which is used to create the `Display` implementation
 /// for an enum.
 ///
@@ -64,7 +67,7 @@ macro_rules! displaydoc {
         impl ::core::fmt::Display for $name {
             fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
                 match self {
-                    $($name::$variant => ::defile::expr! {
+                    $($name::$variant => $crate::defile::expr! {
                         f.write_str($crate::displaydoc!(@@docs, $(#[@$attr])*))
                     },)*
                 }
