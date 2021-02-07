@@ -8,12 +8,13 @@
 [Documentation][docs-rs] | [Crate][crates-io] | [Examples][examples]
 
 This crate is a lite version of the popular crate [`displaydoc`][ddoc].
-It provides the same functionality but using a declarative macro[^1] instead
+It provides the same functionality but using a declarative macro instead
 and not depending on `syn` or `quote`.
 
 This crate is also usable in `no_std` environments. No additional features are required for that.
 
-[^1]: `displaydoc-lite` still has a proc-macro as a dependency, but it's very tiny and doesn't have any dependencies.
+Note: `displaydoc-lite` still has a proc-macro as a dependency,
+but it's very tiny and doesn't have any dependencies.
 
 ## Example
 
