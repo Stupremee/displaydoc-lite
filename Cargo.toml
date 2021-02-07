@@ -1,6 +1,6 @@
 [package]
 name = "displaydoc-lite"
-version = "0.1.1-alpha.0"
+version = "0.1.1"
 authors = ["Justus K <justus.k@protonmail.com>"]
 edition = "2018"
 description = "Implement the Display trait using your standard doc comments."
@@ -14,3 +14,11 @@ categories = []
 
 [dependencies]
 defile = "0.1"
+
+[dependencies.proc-macros]
+package = "displaydoc-lite-proc_macros"
+path = "src/proc-macros"
+version = "0.1.1"
+
+[workspace]
+members = ["src/proc-macros"]

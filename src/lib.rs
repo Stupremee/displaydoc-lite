@@ -6,8 +6,8 @@
 //!
 //! This crate is also usable in `no_std` environments. No additional features are required for that.
 //!
-//! Note: `displaydoc-lite` still has a proc-macro as a dependency,
-//! but it's very tiny and doesn't have any dependencies.
+//! **Note** that `displaydoc-lite` still has two proc-macro dependencies,
+//! but they are very tiny and do not have any dependencies.
 //!
 //! ## Example
 //!
@@ -45,7 +45,13 @@
 #![deny(rust_2018_idioms, missing_docs, clippy::pedantic)]
 
 #[doc(hidden)]
-pub use defile;
+pub mod export {
+    #[doc(hidden)]
+    pub use defile;
+
+    #[doc(hidden)]
+    pub use proc_macros;
+}
 
 /// The main macro of this crate which is used to create the `Display` implementation
 /// for an enum.
@@ -55,23 +61,12 @@ pub use defile;
 macro_rules! displaydoc {
     ($(#[$enum_attr:meta])*
     $pub:vis enum $name:ident {
-        //$(#[$attr:meta])*
-        //$variant:ident
         $($body:tt)*
     }) => {
         $(#[$enum_attr])*
         $pub enum $name { $($body)* }
 
         $crate::__parse_enum_variant__! { enum $name { $($body)* } }
-        //impl ::core::fmt::Display for $name {
-            //fn fmt(&self, f: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
-                //match self {
-                    //$($name::$variant => $crate::defile::expr! {
-                        //f.write_str($crate::displaydoc!(@@docs, $(#[@$attr])*))
-                    //},)*
-                //}
-            //}
-        //}
     };
 }
 
@@ -87,7 +82,7 @@ macro_rules! __parse_enum_variant__ {
     ) $(, $($tt:tt)* )? ) => {
         #[allow(unused)]
         if let $name::$variant(..) = $this {
-            $crate::defile::expr! {
+            $crate::export::defile::expr! {
                 $crate::__get_doc_string__!(@@unit $f, $(#[@$attr])*)
             }
         } else {
@@ -104,9 +99,9 @@ macro_rules! __parse_enum_variant__ {
         ),* $(,)?
     } $(, $($tt:tt)* )? ) => {
         #[allow(unused)]
-        if let $name::$variant { .. } = $this {
-            $crate::defile::expr! {
-                $crate::__get_doc_string__!(@@unit $f, $(#[@$attr])*)
+        if let $name::$variant { $($field_name),* } = $this {
+            $crate::export::defile::expr! {
+                $crate::__get_doc_string__!(@@struct $f, $(#[@$attr])*)
             }
         } else {
             // process rest of the enum
@@ -120,7 +115,7 @@ macro_rules! __parse_enum_variant__ {
         $variant:ident $(, $($tt:tt)* )?
     ) => {
         if let $name::$variant = $this {
-            $crate::defile::expr! {
+            $crate::export::defile::expr! {
                 $crate::__get_doc_string__!(@@unit $f, $(#[@$field_meta])*)
             }
         } else {
@@ -168,12 +163,18 @@ macro_rules! __get_doc_string__ {
     (@unit $f:ident, #[doc = $($doc:tt)*] $($rest:tt)*) => { $f.write_str(($($doc)*).trim()) };
     (@unit $f:ident, #[$_:meta] $($rest:tt)*) => { $crate::__get_doc_string__!($f, $($rest)*) };
     (@unit $f:ident,) => { Ok(()) };
+
+    (@struct $f:ident, #[doc = $($doc:tt)*] $($rest:tt)*) => {
+        $crate::export::proc_macros::__struct_string__!($f, $($doc)*)
+    };
+    (@struct $f:ident, #[$_:meta] $($rest:tt)*) => { $crate::__get_doc_string__!($f, $($rest)*) };
+    (@struct $f:ident,) => { Ok(()) };
 }
 
 #[cfg(test)]
 mod tests {
     extern crate std;
-    use std::string::ToString;
+    use std::string::{String, ToString};
 
     use super::displaydoc;
 
@@ -185,8 +186,8 @@ mod tests {
             ///
             /// How are you
             Foo,
-            /// test
-            Bar { s: u8 },
+            /// {s} is {x}
+            Bar { s: u8, x: String },
             /// tuple works too
             Baz(u8, u16, u32),
         }
@@ -195,7 +196,14 @@ mod tests {
     #[test]
     fn it_works() {
         assert_eq!(Error::Foo.to_string(), "Hello");
-        assert_eq!(Error::Bar { s: 0 }.to_string(), "test");
+        assert_eq!(
+            Error::Bar {
+                s: 0,
+                x: String::from("hello")
+            }
+            .to_string(),
+            "0 is hello"
+        );
         assert_eq!(Error::Baz(0, 1, 2).to_string(), "tuple works too");
     }
 }

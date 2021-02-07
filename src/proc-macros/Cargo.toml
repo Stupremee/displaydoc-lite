@@ -1,0 +1,14 @@
+[package]
+name = "displaydoc-lite-proc_macros"
+version = "0.1.1"
+authors = ["Justus K <justus.k@protonmail.com>"]
+edition = "2018"
+description = "See https://docs.rs/displaydoc-lite"
+documentation = "https://docs.rs/displaydoc-lite"
+homepage = "https://github.com/Stupremee/displaydoc-lite"
+repository = "https://github.com/Stupremee/displaydoc-lite"
+license = "MIT/Apache-2.0"
+
+[lib]
+proc-macro = true
+path = "lib.rs"
