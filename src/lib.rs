@@ -63,7 +63,7 @@ pub mod export {
     pub use defile;
 
     #[doc(hidden)]
-    pub use proc_macros;
+    pub use displaydoc_lite_proc_macros as proc_macros;
 }
 
 /// The main macro of this crate which is used to create the `Display` implementation

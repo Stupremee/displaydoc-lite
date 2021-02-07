@@ -15,8 +15,7 @@ categories = []
 [dependencies]
 defile = "0.1"
 
-[dependencies.proc-macros]
-package = "displaydoc-lite-proc_macros"
+[dependencies.displaydoc-lite-proc_macros]
 path = "src/proc-macros"
 version = "*"
 
