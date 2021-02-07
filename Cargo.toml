@@ -17,7 +17,7 @@ defile = "0.1"
 
 [dependencies.displaydoc-lite-proc_macros]
 path = "src/proc-macros"
-version = "*"
+version = "0.1"
 
 [workspace]
 members = ["src/proc-macros"]
