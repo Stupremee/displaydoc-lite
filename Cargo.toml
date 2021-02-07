@@ -1,6 +1,6 @@
 [package]
 name = "displaydoc-lite"
-version = "0.1.0"
+version = "0.1.1-alpha.0"
 authors = ["Justus K <justus.k@protonmail.com>"]
 edition = "2018"
 description = "Implement the Display trait using your standard doc comments."
