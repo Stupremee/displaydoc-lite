@@ -93,7 +93,7 @@ macro_rules! __parse_enum_variant__ {
             $field_vis:vis $field_ty:ty
         ),* $(,)?
     ) $(, $($tt:tt)* )? ) => {
-        #[allow(unused)]
+        #[allow(unused, clippy::used_underscore_binding)]
         if let $crate::export::proc_macros::__tuple_bindings__!($name, $variant, $($field_ty,)*) = $this {
             $crate::export::defile::expr! {
                 $crate::__get_doc_string__!(@@struct $f, $(#[@$attr])*)
