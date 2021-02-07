@@ -5,8 +5,6 @@
 
 **Implement the `Display` trait using your standard doc comments.**
 
-[Documentation][docs-rs] | [Crate][crates-io] | [Examples][examples]
-
 This crate is a lite version of the popular crate [`displaydoc`][ddoc].
 It provides the same functionality but using a declarative macro instead
 and not depending on `syn` or `quote`.
@@ -44,9 +42,6 @@ Support for interpolating fields is planed, but currently not implemented.
 Licensed under either [Apache License][apache] or the [MIT][mit] license.
 
 
-[docs-rs]: https://docs.rs/displaydoc-lite
-[crates-io]: https://crates.io/crates/displaydoc-lite
-[examples]: https://github.com/Stupremee/displaydoc-lite/tree/main/tests
 [apache]: https://github.com/Stupremee/displaydoc-lite/tree/main/LICENSE-APACHE
 [mit]: https://github.com/Stupremee/displaydoc-lite/tree/main/LICENSE-MIT
 [ddoc]: https://crates.io/crates/displaydoc
