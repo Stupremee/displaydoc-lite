@@ -104,7 +104,7 @@ pub fn __struct_string__(input: TokenStream) -> TokenStream {
                     .collect::<String>();
                 chars.take(name.len() + 1).for_each(drop);
 
-                string.extend("{}".chars());
+                string.push_str("{}");
                 args.push(Ident::new(&name, span));
             }
             c => string.push(c),
