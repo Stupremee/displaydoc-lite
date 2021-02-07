@@ -13,20 +13,33 @@
 //!
 //! ```rust
 //! use displaydoc_lite::displaydoc;
+//! use std::io;
 //!
 //! displaydoc! {
 //!     #[derive(Debug)]
 //!     pub enum DataStoreError {
-//!         /// data store disconnected
-//!         Disconnect,
-//!         /// the data for key is not available
-//!         Redaction,
-//!         /// invalid header
-//!         InvalidHeader,
+//!         /// data store disconnected: {_0}
+//!         Disconnect(io::Error),
+//!         /// the data for key `{_0}` is not available
+//!         Redaction(String),
+//!         /// invalid header (expected {expected}, found {found})
+//!         InvalidHeader {
+//!             expected: String,
+//!             found: String,
+//!         },
 //!         /// unknown data store error
 //!         Unknown,
 //!     }
 //! }
+//! # fn main() {
+//! # use std::string::ToString;
+//! # assert_eq!(DataStoreError::Redaction("foo".into()).to_string(),
+//! #           "the data for key `foo` is not available".to_owned());
+//! #
+//! # let header = DataStoreError::InvalidHeader { expected: "foo".into(), found: "bar".into() };
+//! # assert_eq!(header.to_string(), "invalid header (expected foo, found bar)".to_owned());
+//! # assert_eq!(DataStoreError::Unknown.to_string(), "unknown data store error".to_owned());
+//! # }
 //! ```
 //!
 //! Support for interpolating fields is planed, but currently not implemented.

@@ -22,12 +22,15 @@ use displaydoc_lite::displaydoc;
 displaydoc! {
     #[derive(Debug)]
     pub enum DataStoreError {
-        /// data store disconnected
-        Disconnect,
-        /// the data for key is not available
-        Redaction,
-        /// invalid header
-        InvalidHeader,
+        /// data store disconnected: {_0}
+        Disconnect(io::Error),
+        /// the data for key `{_0}` is not available
+        Redaction(String),
+        /// invalid header (expected {expected}, found {found})
+        InvalidHeader {
+            expected: String,
+            found: String,
+        },
         /// unknown data store error
         Unknown,
     }
