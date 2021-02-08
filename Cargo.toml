@@ -13,7 +13,6 @@ keywords = ["derive", "display"]
 categories = []
 
 [dependencies]
-defile = "0.1"
 
 [dependencies.displaydoc-lite-proc_macros]
 path = "src/proc-macros"

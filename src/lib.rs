@@ -58,10 +58,7 @@
 #![deny(rust_2018_idioms, missing_docs, clippy::pedantic)]
 
 #[doc(hidden)]
-pub mod export {
-    #[doc(hidden)]
-    pub use defile;
-
+pub mod __private {
     #[doc(hidden)]
     pub use displaydoc_lite_proc_macros as proc_macros;
 }
@@ -94,8 +91,8 @@ macro_rules! __parse_enum_variant__ {
         ),* $(,)?
     ) $(, $($tt:tt)* )? ) => {
         #[allow(unused, clippy::used_underscore_binding)]
-        if let $crate::export::proc_macros::__tuple_bindings__!($name, $variant, $($field_ty,)*) = $this {
-            $crate::export::defile::expr! {
+        if let $crate::__private::proc_macros::__tuple_bindings__!($name, $variant, $($field_ty,)*) = $this {
+            $crate::__defile_expr__! {
                 $crate::__get_doc_string__!(@@struct $f, $(#[@$attr])*)
             }
         } else {
@@ -113,7 +110,7 @@ macro_rules! __parse_enum_variant__ {
     } $(, $($tt:tt)* )? ) => {
         #[allow(unused)]
         if let $name::$variant { $($field_name),* } = $this {
-            $crate::export::defile::expr! {
+            $crate::__defile_expr__! {
                 $crate::__get_doc_string__!(@@struct $f, $(#[@$attr])*)
             }
         } else {
@@ -128,7 +125,7 @@ macro_rules! __parse_enum_variant__ {
         $variant:ident $(, $($tt:tt)* )?
     ) => {
         if let $name::$variant = $this {
-            $crate::export::defile::expr! {
+            $crate::__defile_expr__! {
                 $crate::__get_doc_string__!(@@unit $f, $(#[@$field_meta])*)
             }
         } else {
@@ -178,10 +175,25 @@ macro_rules! __get_doc_string__ {
     (@unit $f:ident,) => { Ok(()) };
 
     (@struct $f:ident, #[doc = $($doc:tt)*] $($rest:tt)*) => {
-        $crate::export::proc_macros::__struct_string__!($f, $($doc)*)
+        $crate::__private::proc_macros::__struct_string__!($f, $($doc)*)
     };
     (@struct $f:ident, #[$_:meta] $($rest:tt)*) => { $crate::__get_doc_string__!($f, $($rest)*) };
     (@struct $f:ident,) => { Ok(()) };
+}
+
+/// This macro is copied from the [`defile`](https://lib.rs/defile) crate
+#[macro_export]
+macro_rules! __defile_expr__ {
+    ( $($input:tt)* ) => (
+        #[allow(non_camel_case_types)]
+        {
+            #[derive($crate::__private::proc_macros::__expr_hack__)]
+            enum __defile__Hack__ {
+                __defile__Hack__ = (stringify!($($input)*), 42).1
+            }
+            __defile__Hack__!()
+        }
+    )
 }
 
 #[cfg(test)]
