@@ -37,8 +37,6 @@ displaydoc! {
 }
 ```
 
-Support for interpolating fields is planed, but currently not implemented.
-
 
 ### License
 
