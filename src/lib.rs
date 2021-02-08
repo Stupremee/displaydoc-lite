@@ -215,6 +215,8 @@ mod tests {
             Bar { s: u8, x: String },
             /// {_0} tuple {_2} works too {_1}
             Baz(u8, u16, u32),
+            /// debug: {_0:?}
+            Debug(String),
         }
     }
 
@@ -230,5 +232,6 @@ mod tests {
             "0 is hello"
         );
         assert_eq!(Error::Baz(0, 1, 2).to_string(), "0 tuple 2 works too 1");
+        assert_eq!(Error::Debug("hallo".into()).to_string(), "debug: \"hallo\"");
     }
 }

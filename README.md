@@ -37,6 +37,14 @@ displaydoc! {
 }
 ```
 
+## Details
+
+Listing of all supported syntax variants inside a `{}`:
+- `{var}`   -> `write!("{}", self.var)`
+- `{_0}`    -> `write!("{}", self.0)`
+- `{var:?}` -> `write!("{:?}", self.var)`
+- `{_0:?}`  -> `write!("{:?}", self.0)`
+
 
 ### License
 

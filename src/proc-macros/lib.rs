@@ -92,7 +92,11 @@ pub fn __struct_string__(input: TokenStream) -> TokenStream {
 
     let span = lit_span;
 
-    let mut orig_chars = lit.trim_start_matches('r').trim_matches('"').chars();
+    let mut orig_chars = lit
+        .trim_start_matches('r')
+        .trim_matches('"')
+        .chars()
+        .peekable();
     let chars = orig_chars.by_ref();
 
     let mut string = String::new();
@@ -104,7 +108,23 @@ pub fn __struct_string__(input: TokenStream) -> TokenStream {
                     .clone()
                     .take_while(|c| c.is_ascii_alphanumeric() || *c == '_')
                     .collect::<String>();
-                chars.take(name.len() + 1).for_each(drop);
+                chars.take(name.len()).for_each(drop);
+
+                match chars.peek() {
+                    Some(':') => {
+                        chars.next();
+                        if let Some('?') = chars.peek() {
+                            string.push_str("{:?}");
+                            args.push(Ident::new(&name, span));
+                            chars.take(2).for_each(drop);
+                            continue;
+                        }
+                    }
+                    Some('}') => chars.take(1).for_each(drop),
+                    // this crate is not meant to report proper errors,
+                    // so just do nothing here and silently skip.
+                    _ => {}
+                }
 
                 string.push_str("{}");
                 args.push(Ident::new(&name, span));
