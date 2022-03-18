@@ -2,33 +2,28 @@ use proc_macro::{
     Delimiter, Group, Ident, Literal, Punct, Spacing, Span, TokenStream, TokenTree as TT,
 };
 
+fn expect_ident(tt: Option<TT>) -> Ident {
+    match tt {
+        Some(TT::Ident(id)) => id.clone(),
+        Some(TT::Group(g)) => match g.stream().into_iter().next() {
+            Some(TT::Ident(id)) => id,
+            _ => panic!("expected identifier"),
+        },
+        _ => panic!("expected identifier"),
+    }
+}
+
 #[doc(hidden)]
 #[proc_macro]
 pub fn __tuple_bindings__(input: TokenStream) -> TokenStream {
     let mut tokens = input.into_iter();
-    let name = if let Some(TT::Group(group)) = tokens.next() {
-        if let Some(TT::Ident(ident)) = group.stream().into_iter().next() {
-            ident
-        } else {
-            panic!()
-        }
-    } else {
-        panic!()
-    };
+    let name = expect_ident(tokens.next());
 
     if !matches!(tokens.next(), Some(TT::Punct(x)) if x.as_char() == ',') {
         panic!("missing comma");
     }
 
-    let variant = if let Some(TT::Group(group)) = tokens.next() {
-        if let Some(TT::Ident(ident)) = group.stream().into_iter().next() {
-            ident
-        } else {
-            panic!()
-        }
-    } else {
-        panic!()
-    };
+    let variant = expect_ident(tokens.next());
 
     if !matches!(tokens.next(), Some(TT::Punct(x)) if x.as_char() == ',') {
         panic!("missing comma");
@@ -69,16 +64,7 @@ pub fn __struct_string__(input: TokenStream) -> TokenStream {
     // `__struct_string__!(formatter, literal)`
 
     let mut tokens = input.into_iter();
-    let tok = tokens.next();
-    let fmt = if let Some(TT::Group(group)) = tok {
-        if let Some(TT::Ident(ident)) = group.stream().into_iter().next() {
-            ident
-        } else {
-            panic!()
-        }
-    } else {
-        panic!()
-    };
+    let fmt = expect_ident(tokens.next());
 
     if !matches!(tokens.next(), Some(TT::Punct(x)) if x.as_char() == ',') {
         panic!("missing comma");
